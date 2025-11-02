@@ -48,6 +48,14 @@ class TestAccount:
     def test_account_creation_with_promo_after_1960(self):
         account = Account("Jan", "Nowak", '02270803628', "PROM_ABC")
         assert account.balance == 50
+    
+    def test_historia_operations(self):
+        acc = Account("Jan", "Kowalski", 12345678910)
+        acc.add_balance(500)
+        assert acc.balance==500
+        acc.make_express_transfer(300)
+        assert acc.balance==199
+        assert acc.historia == [500.0, -300.0, -1]
 
 class TestRegularTransfer:
     def test_make_a_transfer_with_available_funds(self):

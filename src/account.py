@@ -3,6 +3,7 @@ class Account:
         self.first_name = first_name
         self.last_name = last_name
         self.balance = 0
+        self.historia = []
 
         pesel_str = str(pesel)
 
@@ -37,10 +38,12 @@ class Account:
     
     def add_balance(self,kwota):
         self.balance+=kwota
+        self.historia.append(kwota)
 
     def make_a_transfer(self,kwota):
         if kwota > 0 and self.balance>=kwota:
             self.balance-=kwota
+            self.historia.append(-kwota)
             return True
         else:
             return False
@@ -50,6 +53,8 @@ class Account:
         total = kwota + fee
         if kwota > 0 and self.balance - total >= -fee:
             self.balance -= total
+            self.historia.append(-kwota)
+            self.historia.append(-fee)     
             return True
         return False
         
