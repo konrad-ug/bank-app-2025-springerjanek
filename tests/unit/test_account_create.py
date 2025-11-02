@@ -71,6 +71,18 @@ class TestRegularTransfer:
         result = account.make_a_transfer(-100)
         assert result is False
 
+    def test_make_transfer_exact_balance(self):
+        acc = Account("John", "Doe", 12345678910)
+        acc.add_balance(50)
+        result = acc.make_a_transfer(50)
+        assert result is True
+        assert acc.balance == 0
+
+    def test_make_a_transfer_without_available_funds_and_wrong_amount(self):
+        account = Account("John", "Doe",12345678910)
+        result = account.make_a_transfer(-100)
+        assert result is False
+
     def test_make_a_transfer_with_available_funds(self):
         business_account = BusinessAccount("nazwa_firmy",1234567891)
         business_account.add_balance(100)
@@ -147,6 +159,13 @@ class TestExpressTransfer:
         assert result is True
         assert acc.balance == 95
 
+    def test_express_transfer_business_account_without_enough_funds(self):
+        acc = BusinessAccount("Firma", 1234567891)
+        acc.add_balance(5)
+        result = acc.make_express_transfer(100)
+        assert result is False
+        assert acc.balance == 5
+
     def test_express_transfer_business_account_can_go_negative(self):
         acc = BusinessAccount("Firma", 1234567891)
         acc.add_balance(1)
@@ -154,3 +173,11 @@ class TestExpressTransfer:
         assert result is True
         assert acc.balance == -5
    
+class TestPeselCenturies:
+    def test_pesel_from_2100s(self):
+        acc = Account("Adam", "Nowak", 21451401458)  # mm = 45
+        assert acc.pesel == "21451401458"
+
+    def test_pesel_from_2200s(self):
+        acc = Account("Ewa", "Kowalska", 61651401458)  # mm = 65
+        assert acc.pesel == "61651401458"

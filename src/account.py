@@ -29,8 +29,6 @@ class Account:
             century = 2100
         elif 61 <= mm <= 72:
             century = 2200
-        elif 81 <= mm <= 92:
-            century = 1800
         else:
             return False  # niepoprawny miesiąc
 
