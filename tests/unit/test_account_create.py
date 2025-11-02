@@ -83,7 +83,7 @@ class TestRegularTransfer:
         result = account.make_a_transfer(-100)
         assert result is False
 
-    def test_make_a_transfer_with_available_funds(self):
+    def test_make_a_transfer_with_available_funds_on_business_account(self):
         business_account = BusinessAccount("nazwa_firmy",1234567891)
         business_account.add_balance(100)
         assert business_account.balance >= 100
@@ -98,13 +98,13 @@ class TestRegularTransfer:
         result = business_account.make_a_transfer(100)
         assert result is False
 
-    def test_make_a_transfer_without_available_funds(self):
+    def test_make_a_transfer_without_available_funds_on_business_account(self):
         business_account = BusinessAccount("nazwa_firmy",1234567891)
         result = business_account.make_a_transfer(100)
         assert result is False
         assert business_account.balance == 0
 
-    def test_make_a_transfer_with_available_funds_and_wrong_amount(self):
+    def test_make_a_transfer_with_available_funds_and_wrong_amount_on_business_account(self):
         business_account = BusinessAccount("nazwa_firmy",1234567891)
         business_account.add_balance(100)
         assert business_account.balance >= 100
