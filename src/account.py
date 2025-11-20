@@ -57,6 +57,21 @@ class Account:
             self.historia.append(-fee)     
             return True
         return False
+    
+    def submit_for_loan(self, amount):
+        if len(self.historia) >= 3:
+            last_three = self.historia[-3:]
+            if min(last_three) > 0:
+                self.balance += amount
+                return True
+
+        if len(self.historia) >= 5:
+            last_five_sum = sum(self.historia[-5:])
+            if last_five_sum > amount:
+                self.balance += amount
+                return True
+
+        return False
         
 class BusinessAccount:
     def __init__(self, company_name, nip):
