@@ -11,6 +11,7 @@ class TestLoan:
         [
             ([10, -5, 20, 30, 40], 100, True),
             ([10, 20, -5], 100, False), 
+            ([10,10], 100, False)
         ]
     )
     def test_loan_last_three(self, account, history, amount, expected):
