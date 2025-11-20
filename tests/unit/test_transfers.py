@@ -1,104 +1,65 @@
+import pytest
 from src.account import Account, BusinessAccount
 
-class TestRegularTransfer:
-    def test_make_a_transfer_with_available_funds(self):
-        account = Account("John", "Doe",12345678910)
-        account.add_balance(100)
-        assert account.balance >= 100
-        result = account.make_a_transfer(100)
-        assert result is True
-        assert account.balance == 0
-
-    def test_make_a_transfer_without_available_funds(self):
-        account = Account("John", "Doe",12345678910)
-        result = account.make_a_transfer(100)
-        assert result is False
-        assert account.balance == 0
-
-    def test_make_a_transfer_with_available_funds_and_wrong_amount(self):
-        account = Account("John", "Doe",12345678910)
-        account.add_balance(100)
-        assert account.balance >= 100
-        result = account.make_a_transfer(-100)
-        assert result is False
-
-    def test_make_transfer_exact_balance(self):
+@pytest.fixture
+def personal_account():
+    def _create(balance=0):
         acc = Account("John", "Doe", 12345678910)
-        acc.add_balance(50)
-        result = acc.make_a_transfer(50)
-        assert result is True
-        assert acc.balance == 0
+        acc.add_balance(balance)
+        return acc
+    return _create
 
-    def test_make_a_transfer_without_available_funds_and_wrong_amount(self):
-        account = Account("John", "Doe",12345678910)
-        result = account.make_a_transfer(-100)
-        assert result is False
+@pytest.fixture
+def business_account():
+    def _create(nip=1234567891, balance=0):
+        acc = BusinessAccount("nazwa_firmy", nip)
+        acc.add_balance(balance)
+        return acc
+    return _create
 
-    def test_make_a_transfer_with_available_funds_on_business_account(self):
-        business_account = BusinessAccount("nazwa_firmy",1234567891)
-        business_account.add_balance(100)
-        assert business_account.balance >= 100
-        result = business_account.make_a_transfer(100)
-        assert result is True
-        assert business_account.balance == 0
+class TestRegularTransfer:
 
-    def test_make_a_transfer_with_wrong_nip_and_available_funds(self):
-        business_account = BusinessAccount("nazwa_firmy",231312)
-        business_account.add_balance(100)
-        assert business_account.balance >= 100
-        result = business_account.make_a_transfer(100)
-        assert result is False
-
-    def test_make_a_transfer_without_available_funds_on_business_account(self):
-        business_account = BusinessAccount("nazwa_firmy",1234567891)
-        result = business_account.make_a_transfer(100)
-        assert result is False
-        assert business_account.balance == 0
-
-    def test_make_a_transfer_with_available_funds_and_wrong_amount_on_business_account(self):
-        business_account = BusinessAccount("nazwa_firmy",1234567891)
-        business_account.add_balance(100)
-        assert business_account.balance >= 100
-        result = business_account.make_a_transfer(-100)
-        assert result is False
+    @pytest.mark.parametrize(
+        "account_type, nip, initial_balance, amount, expected_result, expected_balance",
+        [
+            ("personal", None, 100, 100, True, 0),
+            ("personal", None, 0, 100, False, 0),
+            ("personal", None, 100, -100, False, 100),
+            ("personal", None, 50, 50, True, 0),
+            ("personal", None, 0, -100, False, 0),
+            ("business", 1234567891, 100, 100, True, 0),
+            ("business", 231312, 100, 100, False, 100),
+            ("business", 1234567891, 0, 100, False, 0),
+            ("business", 1234567891, 100, -100, False, 100),
+        ]
+    )
+    def test_make_a_transfer(self, personal_account, business_account, account_type, nip, initial_balance, amount, expected_result, expected_balance):
+        if account_type == "personal":
+            acc = personal_account(initial_balance)
+        else:
+            acc = business_account(nip, initial_balance)
+        result = acc.make_a_transfer(amount)
+        assert result == expected_result
+        assert acc.balance == expected_balance
 
 class TestExpressTransfer:
-    def test_express_transfer_personal_account_with_funds(self):
-        acc = Account("John", "Doe", 12345678910)
-        acc.add_balance(100)
-        result = acc.make_express_transfer(50)
-        assert result is True
-        assert acc.balance == 49
 
-    def test_express_transfer_personal_account_without_enough_funds(self):
-        acc = Account("John", "Doe", 12345678910)
-        assert acc.make_express_transfer(1) is False
-        assert acc.balance == 0
-
-    def test_express_transfer_personal_account_at_limit(self):
-        acc = Account("John", "Doe", 12345678910)
-        acc.add_balance(1)
-        result = acc.make_express_transfer(1)
-        assert result is True
-        assert acc.balance == -1
-
-    def test_express_transfer_business_account_with_funds(self):
-        acc = BusinessAccount("Firma", 1234567891)
-        acc.add_balance(200)
-        result = acc.make_express_transfer(100)
-        assert result is True
-        assert acc.balance == 95
-
-    def test_express_transfer_business_account_without_enough_funds(self):
-        acc = BusinessAccount("Firma", 1234567891)
-        acc.add_balance(5)
-        result = acc.make_express_transfer(100)
-        assert result is False
-        assert acc.balance == 5
-
-    def test_express_transfer_business_account_can_go_negative(self):
-        acc = BusinessAccount("Firma", 1234567891)
-        acc.add_balance(1)
-        result = acc.make_express_transfer(1)
-        assert result is True
-        assert acc.balance == -5
+    @pytest.mark.parametrize(
+        "account_type, nip, initial_balance, amount, expected_result, expected_balance",
+        [
+            ("personal", None, 100, 50, True, 49),
+            ("personal", None, 0, 1, False, 0),
+            ("personal", None, 1, 1, True, -1),
+            ("business", 1234567891, 200, 100, True, 95),
+            ("business", 1234567891, 5, 100, False, 5),
+            ("business", 1234567891, 1, 1, True, -5),
+        ]
+    )
+    def test_make_express_transfer(self, personal_account, business_account, account_type, nip, initial_balance, amount, expected_result, expected_balance):
+        if account_type == "personal":
+            acc = personal_account(initial_balance)
+        else:
+            acc = business_account(nip, initial_balance)
+        result = acc.make_express_transfer(amount)
+        assert result == expected_result
+        assert acc.balance == expected_balance
