@@ -64,50 +64,18 @@ class Account:
         last_three = self.historia[-3:]
         return all(t > 0 for t in last_three)
 
-    def _sum_last_five_greater_than(self, amount):
+    def _sum_last_five_greater_than(self, kwota):
         if len(self.historia) < 5:
             return False
-        return sum(self.historia[-5:]) > amount
+        return sum(self.historia[-5:]) > kwota
 
-    def submit_for_loan(self, amount):
+    def submit_for_loan(self, kwota):
         if self._last_three_are_deposits():
-            self.balance += amount
+            self.balance += kwota
             return True
         
-        if self._sum_last_five_greater_than(amount):
-            self.balance += amount
+        if self._sum_last_five_greater_than(kwota):
+            self.balance += kwota
             return True
 
         return False
-        
-class BusinessAccount:
-    def __init__(self, company_name, nip):
-        self.company_name = company_name
-        self.nip = nip
-        self.balance = 0
-
-        nip_str = str(nip)
-
-        if len(nip_str) != 10 or not nip_str.isdigit():
-            self.nip = "Invalid"
-        else:
-            self.nip = nip_str
-    
-    def add_balance(self,kwota):
-        self.balance+=kwota
-
-    def make_a_transfer(self,kwota):
-        if kwota > 0 and self.balance>=kwota and self.nip != "Invalid":
-            self.balance-=kwota
-            return True
-        else:
-            return False
-    
-    def make_express_transfer(self, kwota):
-        fee = 5
-        total = kwota + fee
-        if kwota > 0 and self.balance - total >= -fee:
-            self.balance -= total
-            return True
-        return False
-        
