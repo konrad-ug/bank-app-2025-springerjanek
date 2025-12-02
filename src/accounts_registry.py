@@ -5,7 +5,10 @@ class AccountsRegistry:
         self.accounts = []
 
     def add_account(self, account: Account):
+        if self.search_account(account.pesel):
+            return False
         self.accounts.append(account)
+        return True
     
     def search_account(self, pesel):
         for acc in self.accounts:

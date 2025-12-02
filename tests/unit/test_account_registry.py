@@ -21,6 +21,17 @@ class TestAccountsRegistry:
         assert registry.accounts_number() == 1
         assert registry.list_accounts()[0] == account
 
+    def test_add_account_unique_pesel(self, registry, account):
+        result = registry.add_account(account)
+        assert result is True
+        assert registry.accounts_number() == 1
+
+        # duplicate PESEL should fail
+        duplicate = Account(account.first_name, account.last_name, account.pesel)
+        result = registry.add_account(duplicate)
+        assert result is False
+        assert registry.accounts_number() == 1 
+
     def test_list_accounts(self, registry, account, account2):
         registry.add_account(account)
         registry.add_account(account2)
