@@ -9,9 +9,12 @@ registry = AccountsRegistry()
 @app.route("/api/accounts", methods=['POST'])
 def create_account():
     data = request.get_json()
-    print(f"Create account request: {data}")
     account = Account(data["first_name"], data["last_name"], data["pesel"])
-    registry.add_account(account)
+    
+    added = registry.add_account(account)
+    if not added:
+        return jsonify({"message": "PESEL already exists"}), 409
+
     return jsonify({"message": "Account created"}), 201
 
 @app.route("/api/accounts", methods=['GET'])
@@ -50,7 +53,14 @@ def update_account(pesel):
     if updated is None:
         return jsonify({"message": "Account not found"}), 404
     
-    return jsonify({"message": "Account updated"}), 200
+    account_data = {
+        "first_name": updated.first_name,
+        "last_name": updated.last_name,
+        "pesel": updated.pesel,
+        "balance": updated.balance
+    }
+    
+    return jsonify({"message": "Account updated", "account": account_data}), 200
 
 @app.route("/api/accounts/<pesel>", methods=['DELETE'])
 def delete_account(pesel):
@@ -63,3 +73,30 @@ def delete_account(pesel):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
+@app.route("/api/accounts/<pesel>/transfer", methods=["POST"])
+def account_transfer(pesel):
+    acc = registry.search_account(pesel)
+    if acc is None:
+        return jsonify({"message": "Account not found"}), 404
+
+    data = request.get_json()
+    amount = data.get("amount")
+    transfer_type = data.get("type")
+
+    if transfer_type not in ["incoming", "outgoing", "express"]:
+        return jsonify({"message": "Invalid transfer type"}), 400
+
+    success = False
+    if transfer_type == "incoming":
+        acc.add_balance(amount)
+        success = True
+    elif transfer_type == "outgoing":
+        success = acc.make_a_transfer(amount)
+    elif transfer_type == "express":
+        success = acc.make_express_transfer(amount)
+
+    if success:
+        return jsonify({"message": "Zlecenie przyjęto do realizacji"}), 200
+    else:
+        return jsonify({"message": "Nieudana transakcja"}), 422

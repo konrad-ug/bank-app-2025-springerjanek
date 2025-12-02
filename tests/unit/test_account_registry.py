@@ -21,6 +21,17 @@ class TestAccountsRegistry:
         assert registry.accounts_number() == 1
         assert registry.list_accounts()[0] == account
 
+    def test_add_account_unique_pesel(self, registry, account):
+        result = registry.add_account(account)
+        assert result is True
+        assert registry.accounts_number() == 1
+
+        # duplicate PESEL should fail
+        duplicate = Account(account.first_name, account.last_name, account.pesel)
+        result = registry.add_account(duplicate)
+        assert result is False
+        assert registry.accounts_number() == 1 
+
     def test_list_accounts(self, registry, account, account2):
         registry.add_account(account)
         registry.add_account(account2)
@@ -47,3 +58,52 @@ class TestAccountsRegistry:
         registry.add_account(account)
         registry.add_account(account2)
         assert registry.accounts_number() == 2
+
+    def test_update_account_success(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account(
+            "90010112345",
+            {"first_name": "Janusz", "last_name": "Kowalski-Nowy"}
+        )
+
+        assert updated is account
+        assert account.first_name == "Janusz"
+        assert account.last_name == "Kowalski-Nowy"
+
+    def test_update_account_partial_update(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account(
+            "90010112345",
+            {"first_name": "Johny"}
+        )
+
+        assert updated is account
+        assert account.first_name == "Johny"
+        assert account.last_name == "Kowalski"
+
+    def test_update_account_not_found(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account("11111111111", {"first_name": "X"})
+        assert updated is None
+
+    def test_delete_account_success(self, registry, account, account2):
+        registry.add_account(account)
+        registry.add_account(account2)
+
+        result = registry.delete_account("90010112345")
+
+        assert result is True
+        assert registry.accounts_number() == 1
+        assert registry.search_account("90010112345") is None
+        assert registry.list_accounts() == [account2]
+
+    def test_delete_account_not_found(self, registry, account):
+        registry.add_account(account)
+
+        result = registry.delete_account("11111111111")
+
+        assert result is False
+        assert registry.accounts_number() == 1
