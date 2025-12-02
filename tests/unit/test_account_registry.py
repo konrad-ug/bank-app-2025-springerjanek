@@ -47,3 +47,52 @@ class TestAccountsRegistry:
         registry.add_account(account)
         registry.add_account(account2)
         assert registry.accounts_number() == 2
+
+    def test_update_account_success(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account(
+            "90010112345",
+            {"first_name": "Janusz", "last_name": "Kowalski-Nowy"}
+        )
+
+        assert updated is account
+        assert account.first_name == "Janusz"
+        assert account.last_name == "Kowalski-Nowy"
+
+    def test_update_account_partial_update(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account(
+            "90010112345",
+            {"first_name": "Johny"}
+        )
+
+        assert updated is account
+        assert account.first_name == "Johny"
+        assert account.last_name == "Kowalski"
+
+    def test_update_account_not_found(self, registry, account):
+        registry.add_account(account)
+
+        updated = registry.update_account("11111111111", {"first_name": "X"})
+        assert updated is None
+
+    def test_delete_account_success(self, registry, account, account2):
+        registry.add_account(account)
+        registry.add_account(account2)
+
+        result = registry.delete_account("90010112345")
+
+        assert result is True
+        assert registry.accounts_number() == 1
+        assert registry.search_account("90010112345") is None
+        assert registry.list_accounts() == [account2]
+
+    def test_delete_account_not_found(self, registry, account):
+        registry.add_account(account)
+
+        result = registry.delete_account("11111111111")
+
+        assert result is False
+        assert registry.accounts_number() == 1
