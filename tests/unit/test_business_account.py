@@ -27,6 +27,7 @@ class TestBusinessAcount:
         assert business_account.nip == 'Invalid'  
         assert business_account.balance == 0
     
+    @pytest.mark.no_nip_mock
     def test_constructor_raises_when_company_not_registered(self, mocker):
         mock_response = {"result": {"subject": {"statusVat": "Nieczynny"}}}
         mocker.patch("requests.get", return_value=mocker.Mock(json=lambda: mock_response))
