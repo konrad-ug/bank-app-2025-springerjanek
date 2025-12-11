@@ -1,0 +1,7 @@
+[run]
+omit =
+    src/business_account.py
+
+[report]
+omit =
+    src/business_account.py
