@@ -1,3 +1,7 @@
+import os
+import requests
+from datetime import date
+
 class BusinessAccount:
     def __init__(self, company_name, nip):
         self.company_name = company_name
@@ -9,8 +13,12 @@ class BusinessAccount:
 
         if len(nip_str) != 10 or not nip_str.isdigit():
             self.nip = "Invalid"
-        else:
-            self.nip = nip_str
+            return
+       
+        self.nip = nip_str
+
+        if not self.check_nip_status(self.nip):
+            raise ValueError("Company not registered!!")
     
     def add_balance(self,kwota):
         self.balance+=kwota
@@ -35,3 +43,24 @@ class BusinessAccount:
             self.balance+=kwota
             return True
         return False
+    
+    def check_nip_status(self, nip):
+        today = date.today().isoformat()    
+        try:
+            base_url = os.getenv("BANK_APP_MF_URL", "https://wl-api.mf.gov.pl/api/search/nip")
+            url = f"{base_url}/{nip}?date={today}"
+            response = requests.get(url)
+            data = response.json()
+
+            print("nip status:", data)
+
+            result = data.get("result")
+            subject = result.get("subject")
+            status = subject.get("statusVat")
+
+            return status == "Czynny"
+
+        except Exception as e:
+            print("error:", e)
+            return False
+       
