@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import date
+from lib.smtp import SMTPClient
 
 class BusinessAccount:
     def __init__(self, company_name, nip):
@@ -63,4 +64,12 @@ class BusinessAccount:
         except Exception as e:
             print("error:", e)
             return False
+        
+    def send_history_via_email(self, email):
+        today = date.today().isoformat()
+        subject = f"Account Transfer History {today}"
+        text = f"Company account history: {self.historia}"
+
+        smtp = SMTPClient()
+        return smtp.send(subject, text, email)
        

@@ -1,7 +1,9 @@
 [run]
 omit =
     src/business_account.py
+    lib/smtp.py
 
 [report]
 omit =
     src/business_account.py
+    lib/smtp.py
