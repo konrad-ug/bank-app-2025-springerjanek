@@ -4,19 +4,19 @@ from src.business_account import BusinessAccount
 
 @pytest.fixture
 def personal_account():
-    def _create(balance=0):
+    def create(balance=0):
         acc = Account("John", "Doe", 12345678910)
         acc.add_balance(balance)
         return acc
-    return _create
+    return create
 
 @pytest.fixture
 def business_account():
-    def _create(nip=1234567891, balance=0):
+    def create(nip=1234567891, balance=0):
         acc = BusinessAccount("nazwa_firmy", nip)
         acc.add_balance(balance)
         return acc
-    return _create
+    return create
 
 class TestRegularTransfer:
 

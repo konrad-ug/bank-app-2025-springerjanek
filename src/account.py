@@ -1,3 +1,6 @@
+from datetime import date
+from lib.smtp import SMTPClient
+
 class Account:
     def __init__(self, first_name, last_name, pesel, promo_code=None):
         self.first_name = first_name
@@ -58,24 +61,32 @@ class Account:
             return True
         return False
     
-    def _last_three_are_deposits(self):
+    def last_three_are_deposits(self):
         if len(self.historia) < 3:
             return False
         last_three = self.historia[-3:]
         return all(t > 0 for t in last_three)
 
-    def _sum_last_five_greater_than(self, kwota):
+    def sum_last_five_greater_than(self, kwota):
         if len(self.historia) < 5:
             return False
         return sum(self.historia[-5:]) > kwota
 
     def submit_for_loan(self, kwota):
-        if self._last_three_are_deposits():
+        if self.last_three_are_deposits():
             self.balance += kwota
             return True
         
-        if self._sum_last_five_greater_than(kwota):
+        if self.sum_last_five_greater_than(kwota):
             self.balance += kwota
             return True
 
         return False
+    
+    def send_history_via_email(self, email):
+        today = date.today().isoformat()
+        subject = f"Account Transfer History {today}"
+        text = f"Personal account history: {self.historia}"
+
+        smtp = SMTPClient()
+        return smtp.send(subject, text, email)
