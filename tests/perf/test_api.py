@@ -31,11 +31,11 @@ def test_create_account_and_process_100_incoming_transactions():
 
         resp = requests.post(f"{BASE_URL}/{pesel}/transfer",json=transfer_payload,timeout=0.5)
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         expected_balance += 10
 
     resp = requests.get(f"{BASE_URL}/{pesel}", timeout=0.5)
     assert resp.status_code == 200
 
     data = resp.json()
-    assert data["balance"] == expected_balance
+    assert data["account"]["balance"] == expected_balance
