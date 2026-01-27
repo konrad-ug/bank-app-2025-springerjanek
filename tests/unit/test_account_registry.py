@@ -107,3 +107,13 @@ class TestAccountsRegistry:
 
         assert result is False
         assert registry.accounts_number() == 1
+
+    def test_clear_registry(self, registry, account, account2):
+        registry.add_account(account)
+        registry.add_account(account2)
+        assert registry.accounts_number() == 2
+
+        registry.clear()
+        assert registry.accounts_number() == 0
+        assert registry.list_accounts() == []
+
