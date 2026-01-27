@@ -40,3 +40,6 @@ class AccountsRegistry:
             self.accounts.remove(acc)
             return True
         return False
+    
+    def clear(self):
+        self._accounts = []
