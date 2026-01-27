@@ -1,5 +1,6 @@
 [run]
 omit =
+    src/repositories/accounts_repository_interface.py
     src/business_account.py
     lib/smtp.py
 
