@@ -9,7 +9,7 @@ class Account:
         self.historia = []
 
         pesel_str = str(pesel)
-
+        
         if len(pesel_str) != 11 or not pesel_str.isdigit():
             self.pesel = "Invalid"
         else:
@@ -19,6 +19,27 @@ class Account:
             if self.czy_przyznac_promo(self.pesel):
                 if promo_code and len(promo_code.split('_')) == 2 and promo_code.split('_')[0] == "PROM":
                     self.balance += 50
+
+
+    def to_dict(self):
+        return {
+            "first name": self.first_name,
+            "last_name": self.last_name,
+            "pesel": self.pesel,
+            "balance": self.balance,
+            "history": self.history,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        account = cls(
+            data.get("first_name"),
+            data.get("last_name"),
+            data.get("pesel"),
+        )
+        account.balance = data.get("balance", account.balance)
+        account.history = data.get("history", [])
+        return account
 
     def czy_przyznac_promo(self, pesel):
         s = str(pesel)
